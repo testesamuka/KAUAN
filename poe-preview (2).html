@@ -1,0 +1,370 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bufante do Kauan - Agendamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        'primary-dark': '#4A49C7'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .appointment-card {
+            transition: all 0.3s ease;
+        }
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .time-slot {
+            transition: all 0.2s ease;
+        }
+        .time-slot:hover {
+            transform: scale(1.02);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 min-h-screen transition-colors duration-300">
+    <!-- Header -->
+    <header class="bg-primary text-white py-6 px-4 shadow-lg">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex flex-col items-center">
+                <!-- Logo Principal do Kauan -->
+                <div class="w-32 h-40 mb-4 rounded-xl overflow-hidden border-4 border-white shadow-xl bg-white">
+                    <img src="https://pfst.cf2.poecdn.net/base/image/d2478ab361f5cb4564ec5e65c947e74c2792fd994aa519cdbed86f7df21a69ac?w=305&amp;h=407" alt="Kauan - Bufante" class="w-full h-full object-cover">
+                </div>
+                <h1 class="text-3xl font-bold text-center mb-2">🍽️ Bufante do Kauan</h1>
+                <p class="text-center text-primary-100 opacity-90">Agende seu horário para comer no bufante mais famoso da região!</p>
+                <p class="text-center text-primary-200 text-sm mt-1">Profissional • Qualidade Garantida</p>
+            </div>
+        </div>
+    </header>
+
+
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Seção de Agendamento -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 fade-in">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                    📅 Fazer Agendamento
+                </h2>
+                
+                <form id="appointmentForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Nome Completo
+                        </label>
+                        <input type="text" id="customerName" required="" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors" placeholder="Digite seu nome completo">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Telefone
+                        </label>
+                        <input type="tel" id="customerPhone" required="" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors" placeholder="(11) 99999-9999">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Data
+                        </label>
+                        <input type="date" id="appointmentDate" required="" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Horário
+                        </label>
+                        <div id="timeSlots" class="grid grid-cols-2 gap-2">
+                            <!-- Horários serão inseridos via JavaScript -->
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Número de Pessoas
+                        </label>
+                        <select id="numberOfPeople" required="" class="w-full px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">
+                            <option value="">Selecione</option>
+                            <option value="1">1 pessoa</option>
+                            <option value="2">2 pessoas</option>
+                            <option value="3">3 pessoas</option>
+                            <option value="4">4 pessoas</option>
+                            <option value="5">5 pessoas</option>
+                            <option value="6+">6+ pessoas</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105">
+                        🍴 Confirmar Agendamento
+                    </button>
+                </form>
+            </div>
+
+            <!-- Seção de Agendamentos -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 fade-in">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                    📋 Agendamentos do Dia
+                </h2>
+                
+                <div class="mb-4">
+                    <input type="date" id="filterDate" class="w-full px-4 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors">
+                </div>
+
+                <div id="appointmentsList" class="space-y-3 max-h-96 overflow-y-auto">
+                    <!-- Agendamentos serão inseridos via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold" id="todayCount">0</div>
+                <div class="text-blue-100">Agendamentos Hoje</div>
+            </div>
+            <div class="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold" id="totalCount">0</div>
+                <div class="text-green-100">Total de Agendamentos</div>
+            </div>
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold" id="availableSlots">8</div>
+                <div class="text-purple-100">Horários Disponíveis</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Detectar modo escuro
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Dados simulados (em um app real, isso viria de um banco de dados)
+        let appointments = JSON.parse(localStorage.getItem('buffetAppointments')) || [];
+        let selectedTime = '';
+
+        // Horários disponíveis
+        const timeSlots = [
+            '11:00', '11:30', '12:00', '12:30',
+            '13:00', '13:30', '14:00', '14:30',
+            '18:00', '18:30', '19:00', '19:30',
+            '20:00', '20:30', '21:00', '21:30'
+        ];
+
+        // Inicializar aplicação
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDateInputs();
+            generateTimeSlots();
+            displayAppointments();
+            updateStatistics();
+        });
+
+        function setupDateInputs() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('appointmentDate');
+            const filterDate = document.getElementById('filterDate');
+            
+            dateInput.value = today;
+            dateInput.min = today;
+            filterDate.value = today;
+            
+            filterDate.addEventListener('change', displayAppointments);
+        }
+
+        function generateTimeSlots() {
+            const container = document.getElementById('timeSlots');
+            container.innerHTML = '';
+            
+            timeSlots.forEach(time => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'time-slot px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-primary hover:text-white focus:bg-primary focus:text-white transition-colors dark:text-gray-300';
+                button.textContent = time;
+                button.onclick = () => selectTimeSlot(button, time);
+                container.appendChild(button);
+            });
+        }
+
+        function selectTimeSlot(button, time) {
+            // Remover seleção anterior
+            document.querySelectorAll('.time-slot').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('border-gray-300', 'dark:border-gray-600');
+            });
+            
+            // Selecionar novo horário
+            button.classList.add('bg-primary', 'text-white');
+            button.classList.remove('border-gray-300', 'dark:border-gray-600');
+            selectedTime = time;
+        }
+
+        function isTimeSlotAvailable(date, time) {
+            return !appointments.some(apt => apt.date === date && apt.time === time);
+        }
+
+        function updateTimeSlotAvailability() {
+            const selectedDate = document.getElementById('appointmentDate').value;
+            document.querySelectorAll('.time-slot').forEach(button => {
+                const time = button.textContent;
+                const available = isTimeSlotAvailable(selectedDate, time);
+                
+                if (!available) {
+                    button.disabled = true;
+                    button.classList.add('opacity-50', 'cursor-not-allowed');
+                    button.classList.remove('hover:bg-primary', 'hover:text-white');
+                } else {
+                    button.disabled = false;
+                    button.classList.remove('opacity-50', 'cursor-not-allowed');
+                    button.classList.add('hover:bg-primary', 'hover:text-white');
+                }
+            });
+        }
+
+        // Event listener para mudança de data
+        document.getElementById('appointmentDate').addEventListener('change', function() {
+            selectedTime = '';
+            document.querySelectorAll('.time-slot').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('border-gray-300', 'dark:border-gray-600');
+            });
+            updateTimeSlotAvailability();
+        });
+
+        // Formulário de agendamento
+        document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!selectedTime) {
+                alert('Por favor, selecione um horário!');
+                return;
+            }
+            
+            const name = document.getElementById('customerName').value;
+            const phone = document.getElementById('customerPhone').value;
+            const date = document.getElementById('appointmentDate').value;
+            const people = document.getElementById('numberOfPeople').value;
+            
+            if (!isTimeSlotAvailable(date, selectedTime)) {
+                alert('Este horário já está ocupado!');
+                return;
+            }
+            
+            const appointment = {
+                id: Date.now(),
+                name,
+                phone,
+                date,
+                time: selectedTime,
+                people,
+                createdAt: new Date().toISOString()
+            };
+            
+            appointments.push(appointment);
+            localStorage.setItem('buffetAppointments', JSON.stringify(appointments));
+            
+            // Reset form
+            this.reset();
+            selectedTime = '';
+            document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0];
+            generateTimeSlots();
+            
+            displayAppointments();
+            updateStatistics();
+            updateTimeSlotAvailability();
+            
+            alert('✅ Agendamento confirmado com sucesso! Prepare-se para comer no bufante do Kauan!');
+        });
+
+        function displayAppointments() {
+            const filterDate = document.getElementById('filterDate').value;
+            const container = document.getElementById('appointmentsList');
+            
+            const filteredAppointments = appointments
+                .filter(apt => apt.date === filterDate)
+                .sort((a, b) => a.time.localeCompare(b.time));
+            
+            if (filteredAppointments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <div class="text-4xl mb-2">📅</div>
+                        <p>Nenhum agendamento para esta data</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filteredAppointments.map(apt => `
+                <div class="appointment-card bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-800 dark:text-white">${apt.name}</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">📞 ${apt.phone}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">👥 ${apt.people} pessoa(s)</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
+                                🕐 ${apt.time}
+                            </span>
+                            <button onclick="cancelAppointment(${apt.id})" 
+                                class="block mt-2 text-red-500 hover:text-red-700 text-sm">
+                                ❌ Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function cancelAppointment(id) {
+            if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
+                appointments = appointments.filter(apt => apt.id !== id);
+                localStorage.setItem('buffetAppointments', JSON.stringify(appointments));
+                displayAppointments();
+                updateStatistics();
+                updateTimeSlotAvailability();
+            }
+        }
+
+        function updateStatistics() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayAppointments = appointments.filter(apt => apt.date === today);
+            const selectedDate = document.getElementById('appointmentDate').value || today;
+            const selectedDateAppointments = appointments.filter(apt => apt.date === selectedDate);
+            const availableSlots = timeSlots.length - selectedDateAppointments.length;
+            
+            document.getElementById('todayCount').textContent = todayAppointments.length;
+            document.getElementById('totalCount').textContent = appointments.length;
+            document.getElementById('availableSlots').textContent = Math.max(0, availableSlots);
+        }
+
+
+
+        // Atualizar disponibilidade inicial
+        setTimeout(updateTimeSlotAvailability, 100);
+    </script>
+
+
+</body></html>
